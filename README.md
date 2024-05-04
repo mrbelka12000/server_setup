@@ -17,3 +17,6 @@
 
 ### Monitoring (grafana+prometheus)
     make monitoring
+
+### MongoDB
+    make mongodb
