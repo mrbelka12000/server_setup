@@ -1,4 +1,4 @@
-.PHONY: init redis postgres monitoring
+.PHONY: init redis postgres monitoring mongodb jaeger
 
 init:
 	# Check is docker exists and user can work with docker
@@ -22,3 +22,6 @@ monitoring:
 
 mongodb:
 	docker stack deploy -c mongodb/docker-compose.yml mongo
+
+jaeger:
+	docker stack deploy -c jaeger/docker-compose.yml jaeger

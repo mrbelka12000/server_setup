@@ -20,3 +20,6 @@
 
 ### MongoDB
     make mongodb
+
+### Jaeger
+    make jaeger
