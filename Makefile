@@ -19,3 +19,6 @@ postgres:
 
 monitoring:
 	docker stack deploy -c monitoring/docker-compose.yml monitoring
+
+mongodb:
+	docker stack deploy -c mongodb/docker-compose.yml mongo
