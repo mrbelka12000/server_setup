@@ -18,6 +18,8 @@ postgres:
 	POSTGRES_PASSWORD=$(password) docker stack deploy -c postgres/docker-compose.yml postgres
 
 monitoring:
+	sudo mkdir /var/lib/prometheus
+	sudo bash -c 'cat monitoring/prometheus.yml > /var/lib/prometheus/prometheus.yml'
 	docker stack deploy -c monitoring/docker-compose.yml monitoring
 
 mongodb:

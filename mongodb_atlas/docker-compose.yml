@@ -1,0 +1,20 @@
+version: '3.7'
+services:
+  mongodb:
+    image: mongodb/mongodb-atlas-local
+
+    ports:
+      - 27017:27017
+    volumes:
+      - type: volume
+        source: mongodb_data_volume
+        target: /data/db
+    networks:
+      - main
+
+volumes:
+  mongodb_data_volume:
+
+networks:
+  main:
+    external: true
