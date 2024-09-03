@@ -21,5 +21,8 @@
 ### MongoDB
     make mongodb
 
+### MongoDB Atlas
+    make mongodb_atlas
+
 ### Jaeger
     make jaeger
