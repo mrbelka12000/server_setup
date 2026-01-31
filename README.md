@@ -2,27 +2,43 @@
 
 ## Set up default services
 
-### Repository with sctripts for deploying basic services for web development
+### Repository with scripts for deploying basic services for web development
 
 ## USAGE:
 
 ### For initialize swarm and external network:
     make init
 
+### Docker Daemon (обязательно для мониторинга)
+
+Для корректной работы labels в логах, на **каждой ноде** настроить Docker daemon:
+
+```bash
+sudo cp docker/daemon.json /etc/docker/daemon.json
+sudo systemctl restart docker
+```
+
+Подробнее: [docker/README.md](docker/README.md)
+
+---
+
 ### Postgres
     make postgres password="your password"
 
-### Redis 
+### Redis
     make redis
 
-### Monitoring (grafana+prometheus)
-    make monitoring
+### RabbitMQ
+    make rabbitmq
 
-### MongoDB
-    make mongodb
+### MinIO (S3-совместимое хранилище)
+    make minio
 
-### MongoDB Atlas
-    make mongodb_atlas
+### Grafana Stack (мониторинг + логи)
 
-### Jaeger
-    make jaeger
+Подробная документация: [grafana_stack_for_docker/Readme.md](grafana_stack_for_docker/Readme.md)
+
+```bash
+cd grafana_stack_for_docker
+# следовать инструкциям в Readme.md
+```

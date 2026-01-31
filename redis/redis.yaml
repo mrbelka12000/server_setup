@@ -1,0 +1,95 @@
+version: "3.8"
+
+networks:
+  backend:
+    driver: overlay
+    attachable: true
+
+volumes:
+  redis_data:
+
+services:
+  redis:
+    image: redis:7.4
+    # Генерим конфиг из ENV без хранения пароля в файле
+    command: >
+      sh -lc '
+        cat > /usr/local/etc/redis/redis.conf <<EOF
+        bind 0.0.0.0
+        port 6379
+        protected-mode yes
+
+        requirepass ${REDIS_PASSWORD}
+
+        # Persistence (ok for cache too; выключи если вообще не нужно)
+        appendonly yes
+        appendfsync everysec
+        dir /data
+
+        # Conservative snapshots (optional)
+        save 900 1
+        save 300 10
+        save 60 10000
+
+        # Cache eviction policy
+        maxmemory ${REDIS_MAXMEMORY}
+        maxmemory-policy allkeys-lru
+
+        tcp-keepalive 60
+        timeout 0
+        EOF
+
+        exec redis-server /usr/local/etc/redis/redis.conf
+      '
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_MAXMEMORY: ${REDIS_MAXMEMORY:-1024mb}
+    volumes:
+      - redis_data:/data
+    networks: [backend]
+    # НАРУЖУ НЕ ПУБЛИКУЕМ ПОРТЫ
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 120s
+      update_config:
+        order: stop-first
+        parallelism: 1
+        delay: 5s
+      resources:
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+        limits:
+          cpus: "1.0"
+          memory: 2G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.68.0
+    environment:
+      REDIS_ADDR: redis://redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    networks: [backend]
+    # тоже не публикуем наружу
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      update_config:
+        order: stop-first
+        parallelism: 1
+        delay: 5s

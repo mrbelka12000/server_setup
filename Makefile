@@ -1,32 +1,23 @@
-.PHONY: init redis postgres monitoring mongodb mongodb_atlas jaeger
+.PHONY: init redis postgres minio rabbitmq
 
 init:
-	# Check is docker exists and user can work with docker
+	# Check if docker exists and user can work with docker
 	docker ps
 
 	# init swarm
 	docker swarm init
 
-
 	# create external network
-	docker network create --scope=swarm --attachable -d overlay main
+	docker network create --scope=swarm --attachable -d overlay backend
 
 redis:
-	docker stack deploy -c redis/docker-compose.yml redis
+	docker stack deploy -c redis/redis.yaml redis
 
 postgres:
-	POSTGRES_PASSWORD=$(password) docker stack deploy -c postgres/docker-compose.yml postgres
+	docker stack deploy -c postgres/stack.yaml postgres
 
-monitoring:
-	sudo mkdir /var/lib/prometheus
-	sudo bash -c 'cat monitoring/prometheus.yml > /var/lib/prometheus/prometheus.yml'
-	docker stack deploy -c monitoring/docker-compose.yml monitoring
+minio:
+	docker stack deploy -c minio/minio.yaml minio
 
-mongodb:
-	docker stack deploy -c mongodb/docker-compose.yml mongo
-
-mongodb_atlas:
-	docker stack deploy -c mongodb_atlas/docker-compose.yml mongo_atlas
-
-jaeger:
-	docker stack deploy -c jaeger/docker-compose.yml jaeger
+rabbitmq:
+	docker stack deploy -c rabbitmq/rabbitmq.yaml rabbitmq

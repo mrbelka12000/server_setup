@@ -1,0 +1,88 @@
+version: "3.8"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    hostname: rabbitmq-1
+    environment:
+      RABBITMQ_DEFAULT_USER: rmq_admin
+      RABBITMQ_DEFAULT_PASS: CHANGE_ME
+      RABBITMQ_DEFAULT_VHOST: /
+      # Optional: set node name explicitly (single node)
+      RABBITMQ_NODENAME: rabbit@rabbitmq-1
+    configs:
+      - source: rabbitmq_conf
+        target: /etc/rabbitmq/rabbitmq.conf
+        mode: 0444
+      - source: enabled_plugins
+        target: /etc/rabbitmq/enabled_plugins
+        mode: 0444
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - backend
+    ports:
+      # AMQP
+      - target: 5672
+        published: 5672
+        protocol: tcp
+        mode: host
+      # Management UI
+      - target: 15672
+        published: 15672
+        protocol: tcp
+        mode: host
+      # Prometheus metrics
+      - target: 15692
+        published: 15692
+        protocol: tcp
+        mode: host
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 120s
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 10s
+      rollback_config:
+        order: stop-first
+      resources:
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+        limits:
+          cpus: "1.0"
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+volumes:
+  rabbitmq_data:
+
+networks:
+  backend:
+    external: true
+    name: backend
+
+configs:
+  rabbitmq_conf:
+    file: ./rabbitmq.conf
+  enabled_plugins:
+    file: ./enabled_plugins
