@@ -14,7 +14,7 @@ redis:
 	docker stack deploy -c redis/redis.yaml redis
 
 postgres:
-	docker stack deploy -c postgres/stack.yaml postgres
+	docker stack deploy -c postgres/stack.yaml db
 
 minio:
 	docker stack deploy -c minio/minio.yaml minio
