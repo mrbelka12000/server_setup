@@ -35,4 +35,4 @@ scrape_configs:
 # postgres exporter (https://github.com/prometheus-community/postgres_exporter)
 - job_name: 'postgres'
   static_configs:
-  - targets: ['192.168.100.4:9187'] # change 192.168.100.x to your nodes IPs
+  - targets: ['db_postgres-exporter:9187']

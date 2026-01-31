@@ -100,3 +100,37 @@ services:
       options:
         max-size: "50m"
         max-file: "3"
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    secrets:
+      - pg_pass_postgres
+    environment:
+      DATA_SOURCE_URI: "db_postgres:5432/postgres?sslmode=disable"
+      DATA_SOURCE_USER: "postgres"
+      DATA_SOURCE_PASS_FILE: "/run/secrets/pg_pass_postgres"
+    networks:
+      - backend
+    ports:
+      - 9187:9187
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+      placement:
+        constraints:
+          - node.labels.pg == true
+    depends_on:
+      - postgres
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
