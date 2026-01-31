@@ -157,6 +157,29 @@ services:
         limits:
           memory: 512M
 
+  node-exporter:
+    image: "prom/node-exporter:v1.7.0"
+    networks:
+      - backend
+    ports:
+      - 9100:9100
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/rootfs"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    deploy:
+      mode: global
+      update_config:
+        order: start-first
+      resources:
+        limits:
+          memory: 128M
+
 # Uncomment for using docker secrets
 # create docker secret first: docker secret create [OPTIONS] SECRET [file|-]
 # https://docs.docker.com/engine/reference/commandline/secret_create/
